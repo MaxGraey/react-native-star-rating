@@ -35,7 +35,6 @@ const iconSets = {
 };
 
 class StarRating extends Component {
-
   constructor(props) {
     super(props);
 
@@ -68,30 +67,34 @@ class StarRating extends Component {
 
   render() {
 
-    var {
+    const {
         disabled,
         iconSet,
         emptyStar,
         emptyStarColor,
         fullStar,
         halfStar,
-        starColor,
         starSize,
         starStyle,
-        style
+        style,
+        composeHalfStars
     } = this.props;
 
-    var starsLeft = this.state.rating;
+    let {starColor} = this.props;
+
+    let starsLeft = this.state.rating;
     const starButtons = [];
 
-    for (var i = 0, len = this.state.maxStars; i < len; i++) {
+    for (let i = 0, len = this.state.maxStars; i < len; i++) {
       const Icon = iconSets[iconSet];
-      var starIconName = emptyStar;
+      let starIconName = emptyStar;
+      let isHalfStar = false;
 
       if (starsLeft >= 1) {
         starIconName = fullStar;
       } else if (starsLeft === 0.5) {
         starIconName = halfStar;
+        isHalfStar = true;
       } else {
         starColor = emptyStarColor;
       }
@@ -116,15 +119,36 @@ class StarRating extends Component {
             </Button>
           );
       } else {
-          starButtons.push(
-              <Icon
-                key={i + 1}
-                name={starIconName}
-                size={starSize}
-                color={starColor}
-                style={starStyle}
-              />
-          );
+          if (isHalfStar && composeHalfStars) {
+              starButtons.push(
+                  <View key={i + 1}
+                      style={starStyle}
+                  >
+                      <Icon
+                          name={fullStar}
+                          size={starSize}
+                          color={emptyStarColor}
+                          style={{position: 'absolute'}}
+                      />
+                      <Icon
+                          name={starIconName}
+                          size={starSize}
+                          color={starColor}
+                          style={{position: 'absolute'}}
+                      />
+                  </View>
+              );
+          } else {
+              starButtons.push(
+                  <Icon
+                    key={i + 1}
+                    name={starIconName}
+                    size={starSize}
+                    color={starColor}
+                    style={starStyle}
+                  />
+              );
+          }
       }
       starsLeft--;
     }
@@ -150,7 +174,8 @@ StarRating.propTypes = {
   selectedStar: PropTypes.func,
   starColor: PropTypes.string,
   emptyStarColor: PropTypes.string,
-  starSize: PropTypes.number
+  starSize: PropTypes.number,
+  composeHalfStars: PropTypes.bool,
 }
 
 StarRating.defaultProps = {
@@ -163,7 +188,8 @@ StarRating.defaultProps = {
   rating: 0,
   starColor: 'black',
   emptyStarColor: 'gray',
-  starSize: 40
+  starSize: 40,
+  composeHalfStars: false
 }
 
 const styles = StyleSheet.create({
